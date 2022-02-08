@@ -145,7 +145,7 @@ EOM
         TMPFILE=`mktemp ./files/${temp}.${p}.XXXXXX` || exit 1
 
         _writeLog "⏲️      Processing Repo $p"
-        __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}eva-beaver/reorg-movies/branches"
+        __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/reorg-movies/branches"
   
     done < $MANIFEST_NAME
 
