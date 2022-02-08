@@ -142,11 +142,21 @@ EOM
     while IFS="" read -r p || [ -n "$p" ]
     do
 
-        TMPFILE=`mktemp ./files/${temp}.${p}.XXXXXX` || exit 1
+        TMPFILE=`mktemp ./files/${temp}.${p}.XXXXXX.json` || exit 1
 
         _writeLog "⏲️      Processing Repo $p"
         __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/reorg-movies/branches"
   
+        TMPFILEBRANCHES=`mktemp ./files/${temp}.${p}.branches.XXXXXX.json` || exit 1
+
+        # extract branches
+        jq -r '.[].name' $TMPFILE >> $TMPFILEBRANCHES
+
+        # loop over branches
+        jq -c '.[].name' $TMPFILE | while read i; do
+            echo $i
+        done
+
     done < $MANIFEST_NAME
 
     _writeLog "👋       Finished!!!"
