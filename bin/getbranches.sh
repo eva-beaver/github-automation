@@ -145,7 +145,7 @@ EOM
         TMPFILE=`mktemp ./files/${temp}.${p}.XXXXXX.json` || exit 1
 
         _writeLog "⏲️      Processing Repo $p"
-        __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/reorg-movies/branches"
+        __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches"
   
         TMPFILEBRANCHES=`mktemp ./files/${temp}.${p}.branches.XXXXXX.json` || exit 1
 
@@ -153,8 +153,19 @@ EOM
         jq -r '.[].name' $TMPFILE >> $TMPFILEBRANCHES
 
         # loop over branches
-        jq -c '.[].name' $TMPFILE | while read i; do
-            echo $i
+        jq -r '.[].name' $TMPFILE | while read i; do
+
+            _writeLog "⏲️      Processing Repo branch $p/$i"
+
+            TMPFILE=`mktemp ./files/${temp}.${p}.branch.${i}.XXXXXX.json` || exit 1
+
+            __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$i"
+ 
+            TMPFILE=`mktemp ./files/${temp}.${p}.branch.protection.${i}.XXXXXX.json` || exit 1
+
+            __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$i/protection"
+    
+ 
         done
 
     done < $MANIFEST_NAME
