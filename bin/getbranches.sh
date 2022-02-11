@@ -15,6 +15,8 @@
  #* limitations under the License.
  #*/
   
+# ./bin/getbranches.sh -m manifest.txt -t token -r branch
+
 #set -e    # this line will stop the script on error
 #set -xv   # this line will enable debug
 
@@ -23,9 +25,8 @@
 . $(dirname $0)/_common.sh
 . $(dirname $0)/_logging.sh
 . $(dirname $0)/_github.sh
-
-logDir="./log"
-fileDir="./files"
+. $(dirname $0)/_branchreport.sh
+. $(dirname $0)/_table.sh
 
 function usage() {
     set -e
@@ -71,20 +72,29 @@ EOM
     __require git
     __require jq
 
-    # Check files directory
-    if [ -d "${logDir}" ] ; then
-        echo "✔️$logDir directory exists";
+    # Check log directory
+    if [ -d "${LOGDIR}" ] ; then
+        echo "✔️$LOGDIR directory exists";
     else
-        echo "✔️ $logDir does exist, creating";
-        mkdir $logDir
+        echo "✔️ $LOGDIR does exist, creating";
+        mkdir $LOGDIR
     fi
 
-    # Check log directory
-    if [ -d "${fileDir}" ] ; then
-        echo "✔️$fileDir directory exists";
+    # Check fle directory
+    if [ -d "${FILEDIR}" ] ; then
+        echo "✔️$FILEDIR directory exists";
     else
-        echo "✔️ $fileDir does exist, creating";
-        mkdir $fileDir
+        echo "✔️ $FILEDIR does exist, creating";
+        mkdir $FILEDIR
+    fi
+
+
+    # Check output directory
+    if [ -d "${OUTPUTDIR}" ] ; then
+        echo "✔️$OUTPUTDIR directory exists";
+    else
+        echo "✔️ $OUTPUTDIR does exist, creating";
+        mkdir $OUTPUTDIR
     fi
 
     OUTPUT=$(pwd)
@@ -92,8 +102,9 @@ EOM
     MANIFEST_NAME="manifest.txt"
     _MANIFEST=$MANIFEST_NAME
     _GITHUB_TOKEN=""
+    _REPORT_NAME="missing"
     _DEBUG=0
-
+    
     # Loop through arguments, two at a time for key and value
     while [[ $# > 0 ]]
     do
@@ -106,6 +117,10 @@ EOM
                 ;;
             -t|--token)
                 _GITHUB_TOKEN="$2"
+                shift # past argument
+                ;;
+            -r|--report)
+                _REPORT_NAME="$2"
                 shift # past argument
                 ;;
             -d|--debug)
@@ -128,6 +143,12 @@ EOM
     MANIFEST_NAME=$_MANIFEST
     GITHUB_TOKEN=$_GITHUB_TOKEN
 
+    if [[ $_REPORT_NAME = "missing" ]]
+    then
+        _writeLog "❌        No report provided";
+        exit 2
+    fi
+
     # check if manifest file exists
     if test -f "$MANIFEST_NAME"; then
         _writeLog "✔️       $MANIFEST_NAME exists"
@@ -135,39 +156,9 @@ EOM
         _writeLog "❌        check failure - [$_MANIFEST] does not exist!!!!"; exit 1
     fi
 
-    GITHUB_API_REST="repos/"
-
-    temp=`basename $0`
-
-    while IFS="" read -r p || [ -n "$p" ]
-    do
-
-        TMPFILE=`mktemp ./files/${temp}.${p}.XXXXXX.json` || exit 1
-
-        _writeLog "⏲️      Processing Repo $p"
-        __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches"
-  
-        TMPFILEBRANCHES=`mktemp ./files/${temp}.${p}.branches.XXXXXX.json` || exit 1
-
-        # extract branches
-        jq -r '.[].name' $TMPFILE >> $TMPFILEBRANCHES
-
-        # loop over branches
-        jq -r '.[].name' $TMPFILE | while read i; do
-
-            _writeLog "⏲️      Processing Repo branch $p/$i"
-
-            TMPFILE=`mktemp ./files/${temp}.${p}.branch.${i}.XXXXXX.json` || exit 1
-
-            __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$i"
- 
-            TMPFILE=`mktemp ./files/${temp}.${p}.branch.protection.${i}.XXXXXX.json` || exit 1
-
-            __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$i/protection"
-    
- 
-        done
-
-    done < $MANIFEST_NAME
+    if [[ $_REPORT_NAME = "branch" ]]
+    then
+        __branchReport "XX"
+    fi
 
     _writeLog "👋       Finished!!!"

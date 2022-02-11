@@ -34,7 +34,27 @@ function __require {
         exit 1;
     }
 }
+ 
+# Using jq to extract json node data from the jsonfile
+# usage 
+#   $1 = filename
+#   $2 = query
+#   $3 = default value
+function __getJsonItem {
+ 
+    # -r option removes "
+    local ITEM_TO_FIND="$(cat $1 | jq -r $2)"
 
+    if [[ $ITEM_TO_FIND == "null" ]]
+    then
+      echo $3
+      return 1
+    else
+      echo ${ITEM_TO_FIND}
+      return 0
+    fi
+
+}
 function __createTempDirectory {
     NAME="$(date "+%Y%m%d%H%M%S")"
     TMP_DIR="${WORKING_DIRECTORY}/${NAME}"

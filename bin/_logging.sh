@@ -39,13 +39,13 @@ error_raw() {
 function _writeLog {
 
     echo $1
-    echo $1 >> ./log/checkit-log-$UNIQID.txt
+    echo $1 >> ./$LOGDIR/checkit-log-$UNIQID.txt
 
 }
 
 #////////////////////////////////
 function _writeErrorLog {
 
-    echo $1 >> ./log/checkit-error-movies-$UNIQID.txt
+    echo $1 >> ./$LOGDIR/checkit-error-movies-$UNIQID.txt
 
 }
