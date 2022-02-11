@@ -26,6 +26,7 @@
 . $(dirname $0)/_logging.sh
 . $(dirname $0)/_github.sh
 . $(dirname $0)/_branchreport.sh
+. $(dirname $0)/_branchprotectionreport.sh
 . $(dirname $0)/_table.sh
 
 function usage() {
@@ -156,9 +157,10 @@ EOM
         _writeLog "❌        check failure - [$_MANIFEST] does not exist!!!!"; exit 1
     fi
 
-    if [[ $_REPORT_NAME = "branch" ]]
-    then
-        __branchReport "XX"
+    if [[ $_REPORT_NAME = "branch" ]]; then
+        __branchReport 
+    elif [[ $_REPORT_NAME = "branchProtection" ]]; then
+       __branchProtectionReport
     fi
 
     _writeLog "👋       Finished!!!"

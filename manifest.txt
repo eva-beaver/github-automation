@@ -1,2 +1,3 @@
 dogtooth-user-service
 dogtooth-department-service
+github-automation
