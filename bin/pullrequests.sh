@@ -19,15 +19,15 @@ $(dirname $0)/_vars.sh
 $(dirname $0)/_logging.sh
 
 #////////////////////////////////
-function __branchProtectionReport {
+function __pullRequestReport {
 
-    GITHUB_API_REST="repos/"
+    GITHUB_API_REST="pulls/"
 
     temp=`basename $0`
 
-    reportName="BranchProtectionReport.csv"
+    reportName="PullRequestReport.csv"
 
-    reportHeader="Repo Name, Branch Name, Protected, Dismiss Stale Reviews"
+    reportHeader="Repo Name, Branch Name, Protected, Dismiss Stale Reviews, Branch Author, Branch Date"
     reportData=''
 
     printf "$reportHeader" > ./${OUTPUTDIR}/${reportName}
@@ -60,7 +60,9 @@ function __branchProtectionReport {
                 __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$i"
 
                 protected=$(__getJsonItem $TMPFILE '.protected' "xxxxxx")
-
+                commitauthorname=$(__getJsonItem $TMPFILE '.commit.commit.author.name' "xxxxxx")
+                commitauthorndate=$(__getJsonItem $TMPFILE '.commit.commit.author.date' "xxxxxx")
+ 
                 if [[ $protected = "true" ]]
                 then
                     TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.protection.${i}.XXXXXX.json` || exit 1
@@ -74,13 +76,13 @@ function __branchProtectionReport {
 
                 fi
     
-                reportDataBranch+="\n ${p}, ${i}, ${protected}, ${dismissStaleReviews}"
-                
+                reportDataBranch+="\n ${p}, ${i}, ${protected}, ${dismissStaleReviews}, ${commitauthorname}, ${commitauthorndate}"
+               
                 printf "$reportDataBranch" >> ./${OUTPUTDIR}/${reportName}
 
             done
 
-        sepeator="\n ,  , , "
+        sepeator="\n ,  , , , ,"
         
         printf "$sepeator" >> ./${OUTPUTDIR}/${reportName}
     

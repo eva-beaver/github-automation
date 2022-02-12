@@ -27,6 +27,7 @@
 . $(dirname $0)/_github.sh
 . $(dirname $0)/_branchreport.sh
 . $(dirname $0)/_branchprotectionreport.sh
+. $(dirname $0)/_pullrequests.sh
 . $(dirname $0)/_table.sh
 
 function usage() {
@@ -42,6 +43,9 @@ function usage() {
     Optional arguments:
         -m | --manifest         The manifest to use, defaults to current directory
         -t | --token            The Github token to use
+        -r | --report           Which report to run (see below)
+        -p | --project          Depends on which report you are running
+        -t | --token            The Github token to use
         -d | --debug            Set to 1 to switch on, defaults to off (0)
         -o | --output           Where to output the log to, defaults to current directory
 
@@ -49,10 +53,15 @@ function usage() {
         git:                Local git installation
         jq:                 Local jq installation
 
+    Reports:
+        branch:             Get a list of all branchs, for a repo or a manifest of repos
+        branchProtection    Get a branch protection information, for a repo or a manifest of repos
+        pullRequest         Get a list of all open pull request, for a repo or a manifest of repos
+
     Examples:
       Build a sample project
 
-        ../bin/getbranches.sh -m mymanifest.json -t xxxxxxxxxxxxxxxx
+        ../bin/gitreport.sh -m mymanifest.json -t xxxxxxxxxxxxxxxx -r branch
 
     Notes:
 
@@ -161,6 +170,12 @@ EOM
         __branchReport 
     elif [[ $_REPORT_NAME = "branchProtection" ]]; then
        __branchProtectionReport
+    elif [[ $_REPORT_NAME = "branchProtection" ]]; then
+       __pullRequestReport
+    else
+        _writeLog "❌        unknown report provided";
+        exit 2
+
     fi
 
     _writeLog "👋       Finished!!!"
