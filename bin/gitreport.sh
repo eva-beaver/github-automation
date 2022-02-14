@@ -104,6 +104,8 @@ EOM
     _MANIFEST=$MANIFEST_NAME
     _GITHUB_TOKEN=""
     _REPORT_NAME="missing"
+    _GITHUB_PROJECT_NAME="none"
+    _KEEPFIILES=0
     _DEBUG=0
     
     # Loop through arguments, two at a time for key and value
@@ -124,8 +126,16 @@ EOM
                 _REPORT_NAME="$2"
                 shift # past argument
                 ;;
+            -p|--project)
+                _GITHUB_PROJECT_NAME="$2"
+                shift # past argument
+                ;;
             -d|--debug)
                 _DEBUG=1
+                shift # past argument
+                ;;
+            -k|--keepFiles)
+                _KEEPFIILES=1
                 shift # past argument
                 ;;
             -o|--output)
@@ -140,11 +150,14 @@ EOM
         shift # past argument or value
     done
 
-    DEBUG=$_DEBUG
     MANIFEST_NAME=$_MANIFEST
     GITHUB_TOKEN=$_GITHUB_TOKEN
+    REPORT_NAME=$_REPORT_NAME
+    GITHUB_PROJECT_NAME=$_GITHUB_PROJECT_NAME
+    KEEPFIILES=$_KEEPFIILES
+    DEBUG=$_DEBUG
 
-    if [[ $_REPORT_NAME = "missing" ]]
+    if [[ $REPORT_NAME = "missing" ]]
     then
         _writeLog "❌        No report provided";
         exit 2
@@ -157,10 +170,17 @@ EOM
         _writeLog "❌        check failure - [$_MANIFEST] does not exist!!!!"; exit 1
     fi
 
-    if [[ $_REPORT_NAME = "branch" ]]; then
+    _writeLog "✔️       Running on $(__getOSType)"
+
+    if [[ $REPORT_NAME = "branch" ]]; then
         __branchReport 
-    elif [[ $_REPORT_NAME = "branchProtection" ]]; then
+    elif [[ $REPORT_NAME = "branchProtection" ]]; then
        __branchProtectionReport
+    fi
+
+    if [[ $KEEPFIILES -ne 1 ]]; then
+        rm -rf ${FILEDIR}
+        _writeLog "✔️        Removed ${FILEDIR}"
     fi
 
     _writeLog "👋       Finished!!!"

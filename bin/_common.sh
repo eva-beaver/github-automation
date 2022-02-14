@@ -55,6 +55,7 @@ function __getJsonItem {
     fi
 
 }
+
 function __createTempDirectory {
     NAME="$(date "+%Y%m%d%H%M%S")"
     TMP_DIR="${WORKING_DIRECTORY}/${NAME}"
@@ -67,3 +68,43 @@ function __cleanUpTempDirectory {
     cd "${WORKING_DIRECTORY}"
     rm -rdf "${TMP_DIR}"
 }
+
+function __createTempFile {
+    tempName="$(date "+%Y%m%d%H%M%S")"
+    if [ "$OSTYPE" == "linx-gnu" ]; then
+        fileSuffix=".json"
+    else
+        fileSuffix=""
+    fi
+    TMPFILE=`mktemp -q ./${FILEDIR}/${1}.XXXXXX` || exit 1
+    if [ $? -ne 0 ]; then
+        echo "❌         Can't create temp file ./${FILEDIR}/${1}.XXXXXX, exiting....."
+        exit 1
+    fi
+}
+
+function __getOSType {
+    case "$OSTYPE" in
+    solaris*) echo "SOLARIS" ;;
+    darwin*)  echo "OSX" ;; 
+    linux*)   echo "LINUX" ;;
+    bsd*)     echo "BSD" ;;
+    msys*)    echo "WINDOWS" ;;
+    cygwin*)  echo "ALSO WINDOWS" ;;
+    *)        echo "unknown: $OSTYPE" ;;
+    esac
+}
+
+
+function __showOSType {
+    case "$OSTYPE" in
+    solaris*) echo "SOLARIS" ;;
+    darwin*)  echo "OSX" ;; 
+    linux*)   echo "LINUX" ;;
+    bsd*)     echo "BSD" ;;
+    msys*)    echo "WINDOWS" ;;
+    cygwin*)  echo "ALSO WINDOWS" ;;
+    *)        echo "unknown: $OSTYPE" ;;
+    esac
+}
+

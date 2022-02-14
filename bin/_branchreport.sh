@@ -16,6 +16,7 @@
  #*/
  
 $(dirname $0)/_vars.sh
+$(dirname $0)/_common.sh
 $(dirname $0)/_logging.sh
 
 #////////////////////////////////
@@ -27,7 +28,7 @@ function __branchReport {
 
     reportName="BranchReport.csv"
 
-    reportHeader="Repo Name, Branch Name, Protected, Dismiss Stale Reviews, Branch Author, Branch Date"
+    reportHeader="Repo Name, Branch Name, Protected, Stale Reviews, Branch Author, Branch Date"
     reportData=''
 
     printf "$reportHeader" > ./${OUTPUTDIR}/${reportName}
@@ -35,7 +36,9 @@ function __branchReport {
     while IFS="" read -r p || [ -n "$p" ]
     do
 
-        TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.XXXXXX.json` || exit 1
+        #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.XXXXXX.json` || exit 1
+
+        __createTempFile ${temp}.${p}
 
         _writeLog "⏲️      Processing Repo $p"
         __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches"
@@ -55,7 +58,8 @@ function __branchReport {
 
                 _writeLog "⏲️      Processing Repo branch $p/$i"
 
-                TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.${i}.XXXXXX.json` || exit 1
+                #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.${i}.XXXXXX.json` || exit 1
+                __createTempFile ${temp}-${p}-branch-${i}
 
                 __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$i"
 
@@ -65,7 +69,8 @@ function __branchReport {
  
                 if [[ $protected = "true" ]]
                 then
-                    TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.protection.${i}.XXXXXX.json` || exit 1
+                    #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.protection.${i}.XXXXXX.json` || exit 1
+                    __createTempFile ${temp}.${p}-branch-protection-${i}
 
                     __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$i/protection"
 

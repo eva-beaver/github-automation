@@ -16,6 +16,7 @@
  #*/
  
 $(dirname $0)/_vars.sh
+$(dirname $0)/_common.sh
 $(dirname $0)/_logging.sh
 
 #////////////////////////////////
@@ -35,12 +36,16 @@ function __branchProtectionReport {
     while IFS="" read -r p || [ -n "$p" ]
     do
 
-        TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.XXXXXX.json` || exit 1
+        #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.XXXXXX.json` || exit 1
+        __createTempFile ${temp}-${p}-XXXXXX`
 
         _writeLog "⏲️      Processing Repo $p"
         __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches"
   
-        TMPFILEBRANCHES=`mktemp ./${FILEDIR}/${temp}.${p}.branches.XXXXXX.json` || exit 1
+        #TMPFILEBRANCHES=`mktemp ./${FILEDIR}/${temp}.${p}.branches.XXXXXX.json` || exit 1
+
+        __createTempFile ${temp}-${p}-branches-XXXXXX
+        TMPFILEBRANCHES=$TMPFILE
 
         # extract branches
         jq -r '.[].name' $TMPFILE >> $TMPFILEBRANCHES
@@ -55,7 +60,8 @@ function __branchProtectionReport {
 
                 _writeLog "⏲️      Processing Repo branch $p/$i"
 
-                TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.${i}.XXXXXX.json` || exit 1
+                #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.${i}.XXXXXX.json` || exit 1
+                 __createTempFile ${temp}-${p}-branch-${i}-XXXXXX
 
                 __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$i"
 
@@ -63,7 +69,8 @@ function __branchProtectionReport {
 
                 if [[ $protected = "true" ]]
                 then
-                    TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.protection.${i}.XXXXXX.json` || exit 1
+                    #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.protection.${i}.XXXXXX.json` || exit 1
+                    __createTempFile ${temp}-${p}-branch-protection-${i}
 
                     __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$i/protection"
 
