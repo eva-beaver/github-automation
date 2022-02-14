@@ -15,7 +15,7 @@
  #* limitations under the License.
  #*/
   
-# ./bin/getbranches.sh -m manifest.txt -t token -r branch
+# ./bin/getbranches.sh -m manifest.txt -t your-github-token -r branch
 
 #set -e    # this line will stop the script on error
 #set -xv   # this line will enable debug
@@ -32,16 +32,23 @@
 function usage() {
     set -e
     cat <<EOM
+
     ##### getbranches #####
-    Script to get all branches from a list of github repositories.
+    Script to generate vaious reports on with a manifest file which list multiple github repo projects
+    or you can supply a single repo name
 
     One of the following is required:
 
     Required arguments:
-
-    Optional arguments:
         -m | --manifest         The manifest to use, defaults to current directory
         -t | --token            The Github token to use
+        -r | --report           Report to generate 
+                                    * branch
+                                    * branchProtection
+
+    Optional arguments:
+        -p | --project          Single github reposiitory to use, overrides any manifest provided
+        -k | --keep             Set to 1 to keep temp files directory, defaults to off (0)
         -d | --debug            Set to 1 to switch on, defaults to off (0)
         -o | --output           Where to output the log to, defaults to current directory
 
@@ -60,7 +67,6 @@ EOM
 
     exit 2
 }
-
 
     if [ $# == 0 ]; then usage; fi
 
@@ -88,7 +94,6 @@ EOM
         echo "✔️ $FILEDIR does exist, creating";
         mkdir $FILEDIR
     fi
-
 
     # Check output directory
     if [ -d "${OUTPUTDIR}" ] ; then

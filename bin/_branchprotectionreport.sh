@@ -36,13 +36,10 @@ function __branchProtectionReport {
     while IFS="" read -r p || [ -n "$p" ]
     do
 
-        #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.XXXXXX.json` || exit 1
-        __createTempFile ${temp}-${p}-XXXXXX`
+        __createTempFile ${temp}-${p}-XXXXXX
 
         _writeLog "⏲️      Processing Repo $p"
         __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches"
-  
-        #TMPFILEBRANCHES=`mktemp ./${FILEDIR}/${temp}.${p}.branches.XXXXXX.json` || exit 1
 
         __createTempFile ${temp}-${p}-branches-XXXXXX
         TMPFILEBRANCHES=$TMPFILE
@@ -62,7 +59,6 @@ function __branchProtectionReport {
 
                fixBranchName=${branchName////-}
 
-                #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.${i}.XXXXXX.json` || exit 1
                  __createTempFile ${temp}-${p}-branch-${fixBranchName}-XXXXXX
 
                 __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$branchName"
@@ -71,7 +67,6 @@ function __branchProtectionReport {
 
                 if [[ $protected = "true" ]]
                 then
-                    #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.protection.${i}.XXXXXX.json` || exit 1
                     __createTempFile ${temp}-${p}-branch-protection-${fixBranchName}
 
                     __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$branchName/protection"
