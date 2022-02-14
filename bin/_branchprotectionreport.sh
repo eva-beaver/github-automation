@@ -20,7 +20,7 @@ $(dirname $0)/_common.sh
 $(dirname $0)/_logging.sh
 
 #////////////////////////////////
-function __branchReport {
+function __branchProtectionReport {
 
     GITHUB_API_REST="repos/"
 
@@ -28,7 +28,7 @@ function __branchReport {
 
     reportName="BranchReport.csv"
 
-    reportHeader="Repo Name, Branch Name, Protected, Stale Reviews, Branch Author, Branch Date"
+    reportHeader="Repo Name, Branch Name, Protected, Dismiss Stale Reviews"
     reportData=''
 
     printf "$reportHeader" > ./${OUTPUTDIR}/${reportName}
@@ -37,13 +37,15 @@ function __branchReport {
     do
 
         #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.XXXXXX.json` || exit 1
-
-        __createTempFile ${temp}.${p}
+        __createTempFile ${temp}-${p}-XXXXXX`
 
         _writeLog "⏲️      Processing Repo $p"
         __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches"
   
-        TMPFILEBRANCHES=`mktemp ./${FILEDIR}/${temp}.${p}.branches.XXXXXX.json` || exit 1
+        #TMPFILEBRANCHES=`mktemp ./${FILEDIR}/${temp}.${p}.branches.XXXXXX.json` || exit 1
+
+        __createTempFile ${temp}-${p}-branches-XXXXXX
+        TMPFILEBRANCHES=$TMPFILE
 
         # extract branches
         jq -r '.[].name' $TMPFILE >> $TMPFILEBRANCHES
@@ -58,23 +60,19 @@ function __branchReport {
 
                 _writeLog "⏲️      Processing Repo branch $p/$branchName"
 
+               fixBranchName=${branchName////-}
+
                 #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.${i}.XXXXXX.json` || exit 1
-                fixBranchName=${branchName////-}
-
-                #echo $branchName " " $fixBranchName
-
-                __createTempFile ${temp}-${p}-branch-${fixBranchName}
+                 __createTempFile ${temp}-${p}-branch-${fixBranchName}-XXXXXX
 
                 __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$branchName"
 
                 protected=$(__getJsonItem $TMPFILE '.protected' "xxxxxx")
-                commitauthorname=$(__getJsonItem $TMPFILE '.commit.commit.author.name' "xxxxxx")
-                commitauthorndate=$(__getJsonItem $TMPFILE '.commit.commit.author.date' "xxxxxx")
- 
+
                 if [[ $protected = "true" ]]
                 then
                     #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.protection.${i}.XXXXXX.json` || exit 1
-                    __createTempFile ${temp}.${p}-branch-protection-${fixBranchName}
+                    __createTempFile ${temp}-${p}-branch-protection-${fixBranchName}
 
                     __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$branchName/protection"
 
@@ -85,13 +83,13 @@ function __branchReport {
 
                 fi
     
-                reportDataBranch+="\n ${p}, ${branchName}, ${protected}, ${dismissStaleReviews}, ${commitauthorname}, ${commitauthorndate}"
-               
+                reportDataBranch+="\n ${p}, ${branchName}, ${protected}, ${dismissStaleReviews}"
+                
                 printf "$reportDataBranch" >> ./${OUTPUTDIR}/${reportName}
 
             done
 
-        sepeator="\n ,  , , , ,"
+        sepeator="\n ,  , , "
         
         printf "$sepeator" >> ./${OUTPUTDIR}/${reportName}
     
