@@ -53,26 +53,28 @@ function __branchProtectionReport {
         xx=""
 
         # loop over branches
-        jq -r '.[].name' $TMPFILE | while read i; 
+        jq -r '.[].name' $TMPFILE | while read branchName; 
             do
 
                 reportDataBranch=""
 
-                _writeLog "⏲️      Processing Repo branch $p/$i"
+                _writeLog "⏲️      Processing Repo branch $p/$branchName"
+
+               fixBranchName=${branchName////-}
 
                 #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.${i}.XXXXXX.json` || exit 1
-                 __createTempFile ${temp}-${p}-branch-${i}-XXXXXX
+                 __createTempFile ${temp}-${p}-branch-${fixBranchName}-XXXXXX
 
-                __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$i"
+                __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$branchName"
 
                 protected=$(__getJsonItem $TMPFILE '.protected' "xxxxxx")
 
                 if [[ $protected = "true" ]]
                 then
                     #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.protection.${i}.XXXXXX.json` || exit 1
-                    __createTempFile ${temp}-${p}-branch-protection-${i}
+                    __createTempFile ${temp}-${p}-branch-protection-${fixBranchName}
 
-                    __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$i/protection"
+                    __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$branchName/protection"
 
                     dismissStaleReviews=$(__getJsonItem $TMPFILE '.required_pull_request_reviews.dismiss_stale_reviews' "xxxxxx")
                 else
@@ -81,7 +83,7 @@ function __branchProtectionReport {
 
                 fi
     
-                reportDataBranch+="\n ${p}, ${i}, ${protected}, ${dismissStaleReviews}"
+                reportDataBranch+="\n ${p}, ${branchName}, ${protected}, ${dismissStaleReviews}"
                 
                 printf "$reportDataBranch" >> ./${OUTPUTDIR}/${reportName}
 

@@ -51,17 +51,21 @@ function __branchReport {
         xx=""
 
         # loop over branches
-        jq -r '.[].name' $TMPFILE | while read i; 
+        jq -r '.[].name' $TMPFILE | while read branchName; 
             do
 
                 reportDataBranch=""
 
-                _writeLog "⏲️      Processing Repo branch $p/$i"
+                _writeLog "⏲️      Processing Repo branch $p/$branchName"
 
                 #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.${i}.XXXXXX.json` || exit 1
-                __createTempFile ${temp}-${p}-branch-${i}
+                fixBranchName=${branchName////-}
 
-                __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$i"
+                #echo $branchName " " $fixBranchName
+
+                __createTempFile ${temp}-${p}-branch-${fixBranchName}
+
+                __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$branchName"
 
                 protected=$(__getJsonItem $TMPFILE '.protected' "xxxxxx")
                 commitauthorname=$(__getJsonItem $TMPFILE '.commit.commit.author.name' "xxxxxx")
@@ -70,9 +74,9 @@ function __branchReport {
                 if [[ $protected = "true" ]]
                 then
                     #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.protection.${i}.XXXXXX.json` || exit 1
-                    __createTempFile ${temp}.${p}-branch-protection-${i}
+                    __createTempFile ${temp}.${p}-branch-protection-${fixBranchName}
 
-                    __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$i/protection"
+                    __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$branchName/protection"
 
                     dismissStaleReviews=$(__getJsonItem $TMPFILE '.required_pull_request_reviews.dismiss_stale_reviews' "xxxxxx")
                 else
@@ -81,7 +85,7 @@ function __branchReport {
 
                 fi
     
-                reportDataBranch+="\n ${p}, ${i}, ${protected}, ${dismissStaleReviews}, ${commitauthorname}, ${commitauthorndate}"
+                reportDataBranch+="\n ${p}, ${branchName}, ${protected}, ${dismissStaleReviews}, ${commitauthorname}, ${commitauthorndate}"
                
                 printf "$reportDataBranch" >> ./${OUTPUTDIR}/${reportName}
 
