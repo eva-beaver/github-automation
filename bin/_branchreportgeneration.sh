@@ -34,56 +34,96 @@ function __generateBranchReport {
 
     pageNo=1
 
-    branchPayload=$(__createTempFile2 ${temp}-${repoName}-branches-${pageNo})
+    let __PAGENO=1
+    let __Process=1
 
-    __rest_call_to_file "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${repoName}/branches?per_page=20&page=6" $branchPayload
+    let __BranchNo=0 
 
-    TMPFILEBRANCHES=$(__createTempFile2 ${temp}.${repoName}.branches)
-
-    # extract branches
-    jq -r '.[].name' $branchPayload >> $TMPFILEBRANCHES
-
-    # loop over branches ----  Creates a new subshell as we are pipiing data into the loop
-    jq -r '.[].name' $branchPayload | while read branchName; 
+    while [ $__Process -eq 1 ]; 
         do
 
-            reportDataBranch=""
+            branchPayload=$(__createTempFile2 ${temp}-${repoName}-branches-${pageNo})
 
-            let BranchNo=BranchNo+1 
+            __rest_call_to_file "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${repoName}/branches?per_page=${PERPAGE}&page=${__PAGENO}" $branchPayload
 
-            _writeLog "⏲️      Processing Repo branch $repoName/$branchName ($BranchNo)"
+            datacheck=$(__getJsonItem $branchPayload '.[0].name' "end")
 
-            fixBranchName=${branchName////-}
+            #echo "Page No $__PAGENO $datacheck"
 
-            branchDetailsFile=$(__createTempFile2 ${temp}-${repoName}-branch-${fixBranchName})
+            #echo $datacheck
 
-            __rest_call_to_file "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${repoName}/branches/$branchName" $branchDetailsFile
+            #if [[ $datacheck != "end" ]]
+            #then
+            #    echo "process $datacheck"
+            #else
+            #    echo "stop $datacheck"
+            #fi
 
-            protected=$(__getJsonItem $branchDetailsFile '.protected' "xxxxxx")
-            commitauthorname=$(__getJsonItem $branchDetailsFile '.commit.commit.author.name' "xxxxxx")
-            commitauthorndate=$(__getJsonItem $branchDetailsFile '.commit.commit.author.date' "xxxxxx")
+            #exit 1
 
-            if [[ $protected = "true" ]]
+            if [[ $datacheck != "end" ]]
             then
-                    branchProtectionPayload=$(__createTempFile2 ${temp}.${repoName}-branch-protection-${fixBranchName})
 
-                __rest_call_to_file "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${repoName}/branches/$branchName/protection" $branchProtectionPayload
+                TMPFILEBRANCHES=$(__createTempFile2 ${temp}.${repoName}.branches)
 
-                dismissStaleReviews=$(__getJsonItem $branchProtectionPayload '.required_pull_request_reviews.dismiss_stale_reviews' "xxxxxx")
+                # extract branches
+                jq -r '.[].name' $branchPayload > $TMPFILEBRANCHES
+
+                # loop over branches ----  Creates a new subshell as we are pipiing data into the loop
+                #jq -r '.[].name' $branchPayload | while read branchName; 
+                # loop over branches from extracted branch file
+                while IFS="" read -r branchName || [ -n "$branchName" ]
+                do
+
+                    reportDataBranch=""
+
+                    let __BranchNo=__BranchNo+1 
+
+                    _writeLog "⏲️      Processing Repo branch $repoName/$branchName ($__BranchNo)"
+
+                    fixBranchName=${branchName////-}
+
+                    branchDetailsFile=$(__createTempFile2 ${temp}-${repoName}-branch-${fixBranchName})
+
+                    __rest_call_to_file "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${repoName}/branches/$branchName" $branchDetailsFile
+
+                    protected=$(__getJsonItem $branchDetailsFile '.protected' "xxxxxx")
+                    commitauthorname=$(__getJsonItem $branchDetailsFile '.commit.commit.author.name' "xxxxxx")
+                    commitauthorndate=$(__getJsonItem $branchDetailsFile '.commit.commit.author.date' "xxxxxx")
+
+                    if [[ $protected = "true" ]]
+                    then
+                            branchProtectionPayload=$(__createTempFile2 ${temp}.${repoName}-branch-protection-${fixBranchName})
+
+                        __rest_call_to_file "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${repoName}/branches/$branchName/protection" $branchProtectionPayload
+
+                        dismissStaleReviews=$(__getJsonItem $branchProtectionPayload '.required_pull_request_reviews.dismiss_stale_reviews' "xxxxxx")
+                    else
+
+                        dismissStaleReviews="false"
+
+                    fi
+
+                    reportDataBranch+="\n ${repoName}, ${__BranchNo}, ${branchName}, ${protected}, ${dismissStaleReviews}, ${commitauthorname}, ${commitauthorndate}"
+                    
+                    printf "$reportDataBranch" >> ./${OUTPUTDIR}/${reportName}
+
+                done < $TMPFILEBRANCHES
+                #done
+
+                let __PAGENO=__PAGENO+1 
+
             else
-
-                dismissStaleReviews="false"
-
+                # No more data
+                __Process=0
             fi
-
-            reportDataBranch+="\n ${repoName}, ${BranchNo}, ${branchName}, ${protected}, ${dismissStaleReviews}, ${commitauthorname}, ${commitauthorndate}"
-            
-            printf "$reportDataBranch" >> ./${OUTPUTDIR}/${reportName}
 
         done
 
     sepeator="\n , , , , , ,"
     
     printf "$sepeator" >> ./${OUTPUTDIR}/${reportName}
+
+    _writeLog "✔️ Total Branches $__BranchNo"
 
 }

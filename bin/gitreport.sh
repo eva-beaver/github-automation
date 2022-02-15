@@ -81,7 +81,7 @@ EOM
 
     # Check log directory
     if [ -d "${LOGDIR}" ] ; then
-        echo "✔️$LOGDIR directory exists";
+        echo "✔️ $LOGDIR directory exists";
     else
         echo "✔️ $LOGDIR does exist, creating";
         mkdir $LOGDIR
@@ -89,7 +89,7 @@ EOM
 
     # Check fle directory
     if [ -d "${FILEDIR}" ] ; then
-        echo "✔️$FILEDIR directory exists";
+        echo "✔️ $FILEDIR directory exists";
     else
         echo "✔️ $FILEDIR does exist, creating";
         mkdir $FILEDIR
@@ -97,7 +97,7 @@ EOM
 
     # Check output directory
     if [ -d "${OUTPUTDIR}" ] ; then
-        echo "✔️$OUTPUTDIR directory exists";
+        echo "✔️ $OUTPUTDIR directory exists";
     else
         echo "✔️ $OUTPUTDIR does exist, creating";
         mkdir $OUTPUTDIR

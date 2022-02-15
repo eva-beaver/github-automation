@@ -19,6 +19,7 @@ GITHUB_BASE_URL="https://api.github.com/"
 GITHUB_API_HEADER_ACCEPT="Accept: application/vnd.github.v3+json"
 GITHUB_OWNER="eva-beaver"
 
+PERPAGE=50
 
 LOGDIR="./log"
 FILEDIR="./files"
