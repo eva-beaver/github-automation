@@ -83,6 +83,22 @@ function __createTempFile {
     fi
 }
 
+function __createTempFile2 {
+    tempName="$(date "+%Y%m%d%H%M%S")"
+    if [ "$OSTYPE" == "linx-gnu" ]; then
+        fileSuffix=".json"
+    else
+        fileSuffix=""
+    fi
+    newFile=`mktemp -q ${FILEDIR}/${1}.XXXXXX` || exit 1
+    if [ $? -ne 0 ]; then
+        echo "❌         Can't create temp file ./${FILEDIR}/${1}.XXXXXX, exiting....."
+        exit 1
+    else
+        echo $newFile
+    fi
+}
+
 function __getOSType {
     case "$OSTYPE" in
     solaris*) echo "SOLARIS" ;;

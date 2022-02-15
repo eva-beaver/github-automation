@@ -20,5 +20,11 @@ $(dirname $0)/_logging.sh
 
 function __rest_call {
     #echo $1
-    curl -s $1 -H "${GITHUB_API_HEADER_ACCEPT}" -H "Authorization: token $GITHUB_TOKEN" >> $TMPFILE
+    curlOutput=$(curl -s $1 -H "${GITHUB_API_HEADER_ACCEPT}" -H "Authorization: token $GITHUB_TOKEN")
+    echo $curlOutput
+}
+
+function __rest_call_to_file {
+    #echo $1
+    curl -s $1 -H "${GITHUB_API_HEADER_ACCEPT}" -H "Authorization: token $GITHUB_TOKEN" >> $2
 }

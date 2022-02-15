@@ -33,52 +33,48 @@ function __branchReport {
 
     printf "$reportHeader" > ./${OUTPUTDIR}/${reportName}
 
+    # Loop over manifest
     while IFS="" read -r p || [ -n "$p" ]
     do
 
-        #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.XXXXXX.json` || exit 1
-
-        __createTempFile ${temp}.${p}
-
         _writeLog "⏲️      Processing Repo $p"
-        __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches"
-  
-        TMPFILEBRANCHES=`mktemp ./${FILEDIR}/${temp}.${p}.branches.XXXXXX.json` || exit 1
+
+        pageNo=1
+
+        branchPayload=$(__createTempFile2 ${temp}-${p}-branches-${pageNo})
+
+        __rest_call_to_file "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches" $branchPayload
+
+        TMPFILEBRANCHES=$(__createTempFile2 ${temp}.${p}.branches)
 
         # extract branches
-        jq -r '.[].name' $TMPFILE >> $TMPFILEBRANCHES
-
-        xx=""
-
+        jq -r '.[].name' $branchPayload >> $TMPFILEBRANCHES
+ 
         # loop over branches
-        jq -r '.[].name' $TMPFILE | while read branchName; 
+        jq -r '.[].name' $branchPayload | while read branchName; 
             do
 
                 reportDataBranch=""
 
                 _writeLog "⏲️      Processing Repo branch $p/$branchName"
 
-                #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.${i}.XXXXXX.json` || exit 1
                 fixBranchName=${branchName////-}
 
-                #echo $branchName " " $fixBranchName
+                branchDetailsFile=$(__createTempFile2 ${temp}-${p}-branch-${fixBranchName})
 
-                __createTempFile ${temp}-${p}-branch-${fixBranchName}
+                __rest_call_to_file "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$branchName" $branchDetailsFile
 
-                __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$branchName"
-
-                protected=$(__getJsonItem $TMPFILE '.protected' "xxxxxx")
-                commitauthorname=$(__getJsonItem $TMPFILE '.commit.commit.author.name' "xxxxxx")
-                commitauthorndate=$(__getJsonItem $TMPFILE '.commit.commit.author.date' "xxxxxx")
+                protected=$(__getJsonItem $branchDetailsFile '.protected' "xxxxxx")
+                commitauthorname=$(__getJsonItem $branchDetailsFile '.commit.commit.author.name' "xxxxxx")
+                commitauthorndate=$(__getJsonItem $branchDetailsFile '.commit.commit.author.date' "xxxxxx")
  
                 if [[ $protected = "true" ]]
                 then
-                    #TMPFILE=`mktemp ./${FILEDIR}/${temp}.${p}.branch.protection.${i}.XXXXXX.json` || exit 1
-                    __createTempFile ${temp}.${p}-branch-protection-${fixBranchName}
+                     branchProtectionPayload=$(__createTempFile2 ${temp}.${p}-branch-protection-${fixBranchName})
 
-                    __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$branchName/protection"
+                    __rest_call_to_file "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$branchName/protection" $branchProtectionPayload
 
-                    dismissStaleReviews=$(__getJsonItem $TMPFILE '.required_pull_request_reviews.dismiss_stale_reviews' "xxxxxx")
+                    dismissStaleReviews=$(__getJsonItem $branchProtectionPayload '.required_pull_request_reviews.dismiss_stale_reviews' "xxxxxx")
                 else
 
                     dismissStaleReviews="false"
