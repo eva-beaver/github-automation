@@ -15,82 +15,37 @@
  #* limitations under the License.
  #*/
  
-$(dirname $0)/_vars.sh
-$(dirname $0)/_common.sh
-$(dirname $0)/_logging.sh
+. $(dirname $0)/_vars.sh
+. $(dirname $0)/_common.sh
+. $(dirname $0)/_logging.sh
+. $(dirname $0)/_processmanifest.sh
+. $(dirname $0)/_branchprotertionreportgeneration.sh
 
 #////////////////////////////////
+#/ Param 1                  GITHUB PROJECT NAME
+#////////////////////////////////
 function __branchProtectionReport {
+
+    _projectName=$1
 
     GITHUB_API_REST="repos/"
 
     temp=`basename $0`
 
-    reportName="BranchReport.csv"
+    reportName="BranchProtectionReport.csv"
 
-    reportHeader="Repo Name, Branch Name, Protected, Dismiss Stale Reviews"
+    reportHeader="Repo Name, No, Branch Name, Protected, Dismiss Stale Reviews"
     reportData=''
 
     printf "$reportHeader" > ./${OUTPUTDIR}/${reportName}
 
-    while IFS="" read -r p || [ -n "$p" ]
-    do
-
-        __createTempFile ${temp}-${p}-XXXXXX
-
-        _writeLog "⏲️      Processing Repo $p"
-        __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches"
-
-        __createTempFile ${temp}-${p}-branches-XXXXXX
-        TMPFILEBRANCHES=$TMPFILE
-
-        # extract branches
-        jq -r '.[].name' $TMPFILE >> $TMPFILEBRANCHES
-
-        xx=""
-
-        # loop over branches
-        jq -r '.[].name' $TMPFILE | while read branchName; 
-            do
-
-                reportDataBranch=""
-
-                _writeLog "⏲️      Processing Repo branch $p/$branchName"
-
-               fixBranchName=${branchName////-}
-
-                 __createTempFile ${temp}-${p}-branch-${fixBranchName}-XXXXXX
-
-                __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$branchName"
-
-                protected=$(__getJsonItem $TMPFILE '.protected' "xxxxxx")
-
-                if [[ $protected = "true" ]]
-                then
-                    __createTempFile ${temp}-${p}-branch-protection-${fixBranchName}
-
-                    __rest_call "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${p}/branches/$branchName/protection"
-
-                    dismissStaleReviews=$(__getJsonItem $TMPFILE '.required_pull_request_reviews.dismiss_stale_reviews' "xxxxxx")
-                else
-
-                    dismissStaleReviews="false"
-
-                fi
-    
-                reportDataBranch+="\n ${p}, ${branchName}, ${protected}, ${dismissStaleReviews}"
-                
-                printf "$reportDataBranch" >> ./${OUTPUTDIR}/${reportName}
-
-            done
-
-        sepeator="\n ,  , , "
-        
-        printf "$sepeator" >> ./${OUTPUTDIR}/${reportName}
-    
-        reportData+=$reportDataBranch
-
-    done < $MANIFEST_NAME
+    if [[ $_projectName = "none" ]]
+    then
+        _writeLog "⏲️      Processing Manifest"
+        __processManifestItems
+    else
+        __generateBranchProtectionReport $_projectName
+    fi
  
     printTable ',' "$(cat ./${OUTPUTDIR}/${reportName})"
 

@@ -180,7 +180,7 @@ EOM
     if [[ $REPORT_NAME = "branch" ]]; then
         __branchReport $_GITHUB_PROJECT_NAME
     elif [[ $REPORT_NAME = "branchProtection" ]]; then
-       __branchProtectionReport
+       __branchProtectionReport $_GITHUB_PROJECT_NAME
     fi
 
     if [[ $KEEPFIILES -ne 1 ]]; then
