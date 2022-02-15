@@ -178,7 +178,7 @@ EOM
     _writeLog "✔️       Running on $(__getOSType)"
 
     if [[ $REPORT_NAME = "branch" ]]; then
-        __branchReport 
+        __branchReport $_GITHUB_PROJECT_NAME
     elif [[ $REPORT_NAME = "branchProtection" ]]; then
        __branchProtectionReport
     fi

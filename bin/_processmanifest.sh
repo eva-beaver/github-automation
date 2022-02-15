@@ -18,35 +18,20 @@
 . $(dirname $0)/_vars.sh
 . $(dirname $0)/_common.sh
 . $(dirname $0)/_logging.sh
-. $(dirname $0)/_processmanifest.sh
-. $(dirname $0)/_branchreportgeneration.sh
 
 #////////////////////////////////
-#/ Param 1                  GITHUB PROJECT NAME
+#/
 #////////////////////////////////
-function __branchReport {
-
-    _projectName=$1
+function __processManifestItems {
 
     GITHUB_API_REST="repos/"
 
-    temp=`basename $0`
+    # Loop over manifest
+    while IFS="" read -r p || [ -n "$p" ]
+    do
 
-    reportName="BranchReport.csv"
+        __generateBranchReport $p
 
-    reportHeader="Repo Name, Branch Name, Protected, Stale Reviews, Branch Author, Branch Date"
-    reportData=''
-
-    printf "$reportHeader" > ./${OUTPUTDIR}/${reportName}
- 
-    if [[ $_projectName = "none" ]]
-    then
-        _writeLog "⏲️      Processing Manifest"
-        __processManifestItems
-    else
-        __generateBranchReport $_projectName
-    fi
- 
-    printTable ',' "$(cat ./${OUTPUTDIR}/${reportName})"
+    done < $MANIFEST_NAME
 
 }
