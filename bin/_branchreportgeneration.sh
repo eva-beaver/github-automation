@@ -36,20 +36,22 @@ function __generateBranchReport {
 
     branchPayload=$(__createTempFile2 ${temp}-${repoName}-branches-${pageNo})
 
-    __rest_call_to_file "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${repoName}/branches" $branchPayload
+    __rest_call_to_file "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${repoName}/branches?per_page=20&page=6" $branchPayload
 
     TMPFILEBRANCHES=$(__createTempFile2 ${temp}.${repoName}.branches)
 
     # extract branches
     jq -r '.[].name' $branchPayload >> $TMPFILEBRANCHES
 
-    # loop over branches
+    # loop over branches ----  Creates a new subshell as we are pipiing data into the loop
     jq -r '.[].name' $branchPayload | while read branchName; 
         do
 
             reportDataBranch=""
 
-            _writeLog "⏲️      Processing Repo branch $repoName/$branchName"
+            let BranchNo=BranchNo+1 
+
+            _writeLog "⏲️      Processing Repo branch $repoName/$branchName ($BranchNo)"
 
             fixBranchName=${branchName////-}
 
@@ -74,13 +76,13 @@ function __generateBranchReport {
 
             fi
 
-            reportDataBranch+="\n ${repoName}, ${branchName}, ${protected}, ${dismissStaleReviews}, ${commitauthorname}, ${commitauthorndate}"
+            reportDataBranch+="\n ${repoName}, ${BranchNo}, ${branchName}, ${protected}, ${dismissStaleReviews}, ${commitauthorname}, ${commitauthorndate}"
             
             printf "$reportDataBranch" >> ./${OUTPUTDIR}/${reportName}
 
         done
 
-    sepeator="\n ,  , , , ,"
+    sepeator="\n , , , , , ,"
     
     printf "$sepeator" >> ./${OUTPUTDIR}/${reportName}
 

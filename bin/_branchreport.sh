@@ -34,7 +34,7 @@ function __branchReport {
 
     reportName="BranchReport.csv"
 
-    reportHeader="Repo Name, Branch Name, Protected, Stale Reviews, Branch Author, Branch Date"
+    reportHeader="Repo Name, No, Branch Name, Protected, Stale Reviews, Branch Author, Branch Date"
     reportData=''
 
     printf "$reportHeader" > ./${OUTPUTDIR}/${reportName}
