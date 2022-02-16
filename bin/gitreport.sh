@@ -25,11 +25,12 @@
 . $(dirname $0)/_common.sh
 . $(dirname $0)/_logging.sh
 . $(dirname $0)/_github.sh
+. $(dirname $0)/_table.sh
 . $(dirname $0)/_branchreport.sh
 . $(dirname $0)/_branchprotectionreport.sh
 . $(dirname $0)/_pullreport.sh
 . $(dirname $0)/_metricsreport.sh
-. $(dirname $0)/_table.sh
+. $(dirname $0)/_commitreport.sh
 
 function usage() {
     set -e
@@ -49,6 +50,7 @@ function usage() {
                                     * branchProtection
                                     * pull
                                     * metrics
+                                    * comits
 
     Optional arguments:
         -p | --project          Single github reposiitory to use, overrides any manifest provided
@@ -63,7 +65,7 @@ function usage() {
     Examples:
       Build a sample project
 
-        ../bin/getbranches.sh -m mymanifest.json -t xxxxxxxxxxxxxxxx
+        ../bin/gitreport.sh -m mymanifest.json -t xxxxxxxxxxxxxxxx
 
     Notes:
 
@@ -189,6 +191,8 @@ EOM
        __pullReport $_GITHUB_PROJECT_NAME
     elif [[ $REPORT_NAME = "metrics" ]]; then
        __metricsReport $_GITHUB_PROJECT_NAME
+    elif [[ $REPORT_NAME = "commits" ]]; then
+       __commitReport $_GITHUB_PROJECT_NAME
     else    
         _writeLog "❌        Invalid report selected!!!!";
     fi

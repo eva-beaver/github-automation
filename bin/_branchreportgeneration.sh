@@ -51,7 +51,7 @@ function __generateBranchReport {
             if [[ $datacheck != "end" ]]
             then
 
-                TMPFILEBRANCHES=$(__createTempFile2 ${temp}.${repoName}.branches)
+                TMPFILEBRANCHES=$(__createTempFile2 ${temp}-${repoName}-branches)
 
                 # extract branches
                 jq -r '.[].name' $branchPayload > $TMPFILEBRANCHES
