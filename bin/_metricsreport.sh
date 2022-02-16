@@ -18,32 +18,35 @@
 . $(dirname $0)/_vars.sh
 . $(dirname $0)/_common.sh
 . $(dirname $0)/_logging.sh
-. $(dirname $0)/_branchreportgeneration.sh
-. $(dirname $0)/_branchprotertionreportgeneration.sh
-. $(dirname $0)/_pullreportgeneration.sh
+. $(dirname $0)/_processmanifest.sh
 . $(dirname $0)/_metricsreportgeneration.sh
 
 #////////////////////////////////
-#/
+#/ Param 1                  GITHUB PROJECT NAME
 #////////////////////////////////
-function __processManifestItems {
+function __metricsReport {
+
+    _projectName=$1
 
     GITHUB_API_REST="repos/"
 
-    # Loop over manifest
-    while IFS="" read -r p || [ -n "$p" ]
-    do
+    temp=`basename $0`
 
-        if [[ $REPORT_NAME = "branch" ]]; then
-            __generateBranchReport $p
-        elif [[ $REPORT_NAME = "branchProtection" ]]; then
-            __generateBranchProtectionReport $p
-        elif [[ $REPORT_NAME = "pull" ]]; then
-            __generatePullReport $p
-        elif [[ $REPORT_NAME = "metrics" ]]; then
-            __generateMetricsReport $p
-        fi
-        
-    done < $MANIFEST_NAME
+    reportName="MetricsReport.csv"
+
+    reportHeader="Repo Name, Commits, Week, S, M, T, W, T, F, S"
+    reportData=''
+
+    printf "$reportHeader" > ./${OUTPUTDIR}/${reportName}
+ 
+    if [[ $_projectName = "none" ]]
+    then
+        _writeLog "⏲️      Processing Manifest"
+        __processManifestItems
+    else
+        __generateMetricsReport $_projectName
+    fi
+ 
+    printTable ',' "$(cat ./${OUTPUTDIR}/${reportName})"
 
 }

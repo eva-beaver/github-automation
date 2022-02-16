@@ -28,6 +28,7 @@
 . $(dirname $0)/_branchreport.sh
 . $(dirname $0)/_branchprotectionreport.sh
 . $(dirname $0)/_pullreport.sh
+. $(dirname $0)/_metricsreport.sh
 . $(dirname $0)/_table.sh
 
 function usage() {
@@ -47,6 +48,7 @@ function usage() {
                                     * branch
                                     * branchProtection
                                     * pull
+                                    * metrics
 
     Optional arguments:
         -p | --project          Single github reposiitory to use, overrides any manifest provided
@@ -185,6 +187,10 @@ EOM
        __branchProtectionReport $_GITHUB_PROJECT_NAME
     elif [[ $REPORT_NAME = "pull" ]]; then
        __pullReport $_GITHUB_PROJECT_NAME
+    elif [[ $REPORT_NAME = "metrics" ]]; then
+       __metricsReport $_GITHUB_PROJECT_NAME
+    else    
+        _writeLog "❌        Invalid report selected!!!!";
     fi
 
     if [[ $KEEPFIILES -ne 1 ]]; then
