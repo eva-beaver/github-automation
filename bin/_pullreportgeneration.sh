@@ -78,7 +78,7 @@ function __generatePullReport {
                     __user=$(__getJsonItem $pullPayload ".[$__pullSeq].user.login" "???????")
                     __created_at=$(__getJsonItem $pullPayload ".[$__pullSeq].created_at" "???????")
                     __updated_at=$(__getJsonItem $pullPayload ".[$__pullSeq].updated_at" "???????")
-                    __closed_at=$(__getJsonItem $pullPayload ".[$__pullSeq].closed_at" "???????")
+                    __closed_at=$(__getJsonItem $pullPayload ".[$__pullSeq].closed_at" "")
                     __merged_at=$(__getJsonItem $pullPayload ".[$__pullSeq].merged_at" "")
                     __merge_commit_sha=$(__getJsonItem $pullPayload ".[$__pullSeq].merge_commit_sha" "???????")
 
