@@ -22,7 +22,7 @@
 #////////////////////////////////
 #/ Param 1              Repo Name
 #////////////////////////////////
-function __generateBranchReport {
+function __generateBranchProtectionReport {
 
     repoName=$1
 
@@ -56,8 +56,6 @@ function __generateBranchReport {
                 # extract branches
                 jq -r '.[].name' $branchPayload > $TMPFILEBRANCHES
 
-                # loop over branches ----  Creates a new subshell as we are pipiing data into the loop
-                #jq -r '.[].name' $branchPayload | while read branchName; 
                 # loop over branches from extracted branch file
                 while IFS="" read -r branchName || [ -n "$branchName" ]
                 do
@@ -75,8 +73,6 @@ function __generateBranchReport {
                     __rest_call_to_file "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${repoName}/branches/$branchName" $branchDetailsFile
 
                     protected=$(__getJsonItem $branchDetailsFile '.protected' "xxxxxx")
-                    commitauthorname=$(__getJsonItem $branchDetailsFile '.commit.commit.author.name' "xxxxxx")
-                    commitauthorndate=$(__getJsonItem $branchDetailsFile '.commit.commit.author.date' "xxxxxx")
 
                     if [[ $protected = "true" ]]
                     then
@@ -91,12 +87,11 @@ function __generateBranchReport {
 
                     fi
 
-                    reportDataBranch+="\n ${repoName}, ${__BranchNo}, ${branchName}, ${protected}, ${dismissStaleReviews}, ${commitauthorname}, ${commitauthorndate}"
+                    reportDataBranch+="\n ${repoName}, ${__BranchNo}, ${branchName}, ${protected}, ${dismissStaleReviews}"
                     
                     printf "$reportDataBranch" >> ./${OUTPUTDIR}/${reportName}
 
                 done < $TMPFILEBRANCHES
-                #done
 
                 let __PAGENO=__PAGENO+1 
 
@@ -107,7 +102,7 @@ function __generateBranchReport {
 
         done
 
-    sepeator="\n , , , , , ,"
+    sepeator="\n , , , ,"
     
     printf "$sepeator" >> ./${OUTPUTDIR}/${reportName}
 

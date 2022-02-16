@@ -19,32 +19,32 @@
 . $(dirname $0)/_common.sh
 . $(dirname $0)/_logging.sh
 . $(dirname $0)/_processmanifest.sh
-. $(dirname $0)/_branchprotertionreportgeneration.sh
+. $(dirname $0)/_pullreportgeneration.sh
 
 #////////////////////////////////
 #/ Param 1                  GITHUB PROJECT NAME
 #////////////////////////////////
-function __branchProtectionReport {
+function __pullReport {
 
     _projectName=$1
 
-    GITHUB_API_REST="repos/"
+    GITHUB_API_REST="pulls/"
 
     temp=`basename $0`
 
-    reportName="BranchProtectionReport.csv"
+    reportName="PullReport.csv"
 
-    reportHeader="Repo Name, No, Branch Name, Protected, Dismiss Stale Reviews"
+    reportHeader="Repo Name, No, State, Branch Name, Title, User, Opened, Updated, Closed, Merged"
     reportData=''
 
     printf "$reportHeader" > ./${OUTPUTDIR}/${reportName}
-
+ 
     if [[ $_projectName = "none" ]]
     then
         _writeLog "⏲️      Processing Manifest"
         __processManifestItems
     else
-        __generateBranchProtectionReport $_projectName
+        __generatePullReport $_projectName
     fi
  
     printTable ',' "$(cat ./${OUTPUTDIR}/${reportName})"

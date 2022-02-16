@@ -18,6 +18,9 @@
 . $(dirname $0)/_vars.sh
 . $(dirname $0)/_common.sh
 . $(dirname $0)/_logging.sh
+. $(dirname $0)/_branchreportgeneration.sh
+. $(dirname $0)/_branchprotertionreportgeneration.sh
+. $(dirname $0)/_pullreportgeneration.sh
 
 #////////////////////////////////
 #/
@@ -30,8 +33,14 @@ function __processManifestItems {
     while IFS="" read -r p || [ -n "$p" ]
     do
 
-        __generateBranchReport $p
-
+        if [[ $REPORT_NAME = "branch" ]]; then
+            __generateBranchReport $p
+        elif [[ $REPORT_NAME = "branchProtection" ]]; then
+            __generateBranchProtectionReport $p
+        elif [[ $REPORT_NAME = "pull" ]]; then
+            __generatePullReport $p
+        fi
+        
     done < $MANIFEST_NAME
 
 }

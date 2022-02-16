@@ -27,6 +27,7 @@
 . $(dirname $0)/_github.sh
 . $(dirname $0)/_branchreport.sh
 . $(dirname $0)/_branchprotectionreport.sh
+. $(dirname $0)/_pullreport.sh
 . $(dirname $0)/_table.sh
 
 function usage() {
@@ -45,6 +46,7 @@ function usage() {
         -r | --report           Report to generate 
                                     * branch
                                     * branchProtection
+                                    * pull
 
     Optional arguments:
         -p | --project          Single github reposiitory to use, overrides any manifest provided
@@ -180,7 +182,9 @@ EOM
     if [[ $REPORT_NAME = "branch" ]]; then
         __branchReport $_GITHUB_PROJECT_NAME
     elif [[ $REPORT_NAME = "branchProtection" ]]; then
-       __branchProtectionReport
+       __branchProtectionReport $_GITHUB_PROJECT_NAME
+    elif [[ $REPORT_NAME = "pull" ]]; then
+       __pullReport $_GITHUB_PROJECT_NAME
     fi
 
     if [[ $KEEPFIILES -ne 1 ]]; then
