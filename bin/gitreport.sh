@@ -202,7 +202,7 @@ EOM
     elif [[ $REPORT_NAME = "release" ]]; then
        __releaseReport $_GITHUB_PROJECT_NAME
     elif [[ $REPORT_NAME = "tag" ]]; then
-       __releaseReport $_GITHUB_PROJECT_NAME
+       __tagReport $_GITHUB_PROJECT_NAME
     else    
         _writeLog "❌        Invalid report selected!!!!";
     fi
