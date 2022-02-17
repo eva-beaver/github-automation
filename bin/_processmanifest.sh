@@ -24,6 +24,7 @@
 . $(dirname $0)/_metricsreportgeneration.sh
 . $(dirname $0)/_commitreportgeneration.sh
 . $(dirname $0)/_releasereportgeneration.sh
+. $(dirname $0)/_tagreportgeneration.sh
 
 #////////////////////////////////
 #/
@@ -48,6 +49,8 @@ function __processManifestItems {
             __generateCommitReport $p
         elif [[ $REPORT_NAME = "release" ]]; then
             __generateCommitReport $p
+        elif [[ $REPORT_NAME = "tag" ]]; then
+            __generateTagReport $p
         fi
         
     done < $MANIFEST_NAME
