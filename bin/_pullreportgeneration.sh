@@ -40,6 +40,18 @@ function __generatePullReport {
     let __BranchNo=0 
     let __pullSeq=0
 
+    repoPayload=$(__createTempFile2 ${temp}-${repoName})
+
+    __rest_call_to_file "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${repoName}" $repoPayload
+
+    __fullName=$(__getJsonItem $repoPayload '.full_name' "missing")
+
+    if [[ $__fullName = "missing" ]]
+    then
+        _writeLog "❌      Error Processing Repo $repoName"
+       return 0
+    fi
+
     while [ $__Process -eq 1 ]; 
         do
 

@@ -31,6 +31,7 @@
 . $(dirname $0)/_pullreport.sh
 . $(dirname $0)/_metricsreport.sh
 . $(dirname $0)/_commitreport.sh
+. $(dirname $0)/_releasereport.sh
 
 function usage() {
     set -e
@@ -50,7 +51,8 @@ function usage() {
                                     * branchProtection
                                     * pull
                                     * metrics
-                                    * comits
+                                    * commit
+                                    * release
 
     Optional arguments:
         -p | --project          Single github reposiitory to use, overrides any manifest provided
@@ -193,8 +195,10 @@ EOM
        __pullReport $_GITHUB_PROJECT_NAME
     elif [[ $REPORT_NAME = "metrics" ]]; then
        __metricsReport $_GITHUB_PROJECT_NAME
-    elif [[ $REPORT_NAME = "commits" ]]; then
+    elif [[ $REPORT_NAME = "commit" ]]; then
        __commitReport $_GITHUB_PROJECT_NAME
+    elif [[ $REPORT_NAME = "release" ]]; then
+       __releaseReport $_GITHUB_PROJECT_NAME
     else    
         _writeLog "❌        Invalid report selected!!!!";
     fi
