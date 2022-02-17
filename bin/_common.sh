@@ -124,3 +124,12 @@ function __showOSType {
     esac
 }
 
+function __formatDateYYMMDD {
+    if [[ $OS = "LINUX" ]]
+    then
+        __formattedDate=$(date +"%Y-%m-%d" -d "@$1")
+    else
+        __formattedDate=$(date -r $1 +"%Y-%m-%d")
+    fi
+    echo $__formattedDate
+}

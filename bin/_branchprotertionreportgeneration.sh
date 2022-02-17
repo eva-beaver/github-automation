@@ -30,7 +30,7 @@ function __generateBranchProtectionReport {
 
     temp=`basename $0`
 
-    _writeLog "⏲️      Processing Repo $repoName"
+    _writeLog "⏲️      Processing Branches for Repo $repoName"
 
     pageNo=1
 
