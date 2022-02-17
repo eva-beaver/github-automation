@@ -30,7 +30,7 @@ function __generatePullReport {
 
     temp=`basename $0`
 
-    _writeLog "⏲️      Processing Repo $repoName"
+    _writeLog "⏲️      Processing Pulls For Repo $repoName"
 
     pageNo=1
 
@@ -104,6 +104,6 @@ function __generatePullReport {
     
     printf "$sepeator" >> ./${OUTPUTDIR}/${reportName}
 
-    _writeLog "✔️ Total Branches $__BranchNo"
+    _writeLog "✔️ Total Pulls $__PullNo"
 
 }

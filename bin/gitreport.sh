@@ -79,6 +79,8 @@ EOM
     _writeLog "⏲️     Starting............"
     _writeLog "⏲️     ========================================="
 
+    OS=$(__getOSType)
+
     #if [ $# == 0 ]; then usage; fi
 
     # check for required software

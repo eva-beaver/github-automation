@@ -30,12 +30,7 @@ function __generateMetricsReport {
 
     temp=`basename $0`
 
-    _writeLog "⏲️      Processing Repo $repoName"
-
-    pageNo=1
-
-    let __PAGENO=1
-    let __Process=1
+    _writeLog "⏲️      Processing Metrics for Repo $repoName"
 
     let __noWeeks=0 
 
@@ -45,15 +40,16 @@ function __generateMetricsReport {
 
     datacheck=$(__getJsonItem $commitActivityPayload '.[0].total' "end")
 
+    # Check to see if we found any data
     if [[ $datacheck != "end" ]]
     then
 
         __tmpFileStats=$(__createTempFile2 ${temp}-${repoName}-stats)
 
-        # extract branches
+        # extract stats from json to flat csv
         jq -r '.[] | [.total, .week, .days[]] | @csv' $commitActivityPayload > $__tmpFileStats
 
-        # loop over week stats from extracted file
+        # loop over week stats from extracted data in the csv file
         while IFS="," read -r __noCommits __week __sun __mon __tue __wed __thu __fri __sat || [ -n "$allStats" ]
         do
 
@@ -61,9 +57,12 @@ function __generateMetricsReport {
 
             let __noWeeks=__noWeeks+1 
 
+            # Only show weeks that have had commits
             if [[ $__noCommits -ne 0 ]]; then
-                __dateWeek=$(date +"%Y-%m-%d" -d "@$__week")
+                #__dateWeek=$(date +"%Y-%m-%d" -d "@$__week")
 
+                __dateWeek=$(__formatDateYYMMDD $__week)
+                
                 reportData+="\n ${repoName}, $__noCommits, $__dateWeek, $__mon, $__tue, $__wed, $__thu, $__fri, $__sat, $__sun "
             
                 printf "$reportData" >> ./${OUTPUTDIR}/${reportName}
