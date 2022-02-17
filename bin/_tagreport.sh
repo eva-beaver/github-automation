@@ -24,7 +24,7 @@
 #////////////////////////////////
 #/ Param 1                  GITHUB PROJECT NAME
 #////////////////////////////////
-function __releaseReport {
+function __tagReport {
 
     _projectName=$1
 
