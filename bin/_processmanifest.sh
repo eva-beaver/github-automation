@@ -23,6 +23,7 @@
 . $(dirname $0)/_pullreportgeneration.sh
 . $(dirname $0)/_metricsreportgeneration.sh
 . $(dirname $0)/_commitreportgeneration.sh
+. $(dirname $0)/_releasereportgeneration.sh
 
 #////////////////////////////////
 #/
@@ -43,7 +44,9 @@ function __processManifestItems {
             __generatePullReport $p
         elif [[ $REPORT_NAME = "metrics" ]]; then
             __generateMetricsReport $p
-        elif [[ $REPORT_NAME = "metrics" ]]; then
+        elif [[ $REPORT_NAME = "commit" ]]; then
+            __generateCommitReport $p
+        elif [[ $REPORT_NAME = "release" ]]; then
             __generateCommitReport $p
         fi
         
