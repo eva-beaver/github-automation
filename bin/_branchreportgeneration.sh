@@ -32,6 +32,18 @@ function __generateBranchReport {
 
     _writeLog "⏲️      Processing Branches for Repo $repoName"
 
+    repoPayload=$(__createTempFile2 ${temp}-${repoName})
+
+    __rest_call_to_file "${GITHUB_BASE_URL}${GITHUB_API_REST}${GITHUB_OWNER}/${repoName}" $repoPayload
+
+    __fullName=$(__getJsonItem $repoPayload '.full_name' "missing")
+
+    if [[ $__fullName = "missing" ]]
+    then
+        _writeLog "❌      Error Processing Repo $repoName"
+       return 0
+    fi
+
     pageNo=1
 
     let __PAGENO=1
