@@ -32,6 +32,7 @@
 . $(dirname $0)/_metricsreport.sh
 . $(dirname $0)/_commitreport.sh
 . $(dirname $0)/_releasereport.sh
+. $(dirname $0)/_tagreport.sh
 
 function usage() {
     set -e
@@ -53,6 +54,7 @@ function usage() {
                                     * metrics
                                     * commit
                                     * release
+                                    * tag
 
     Optional arguments:
         -p | --project          Single github reposiitory to use, overrides any manifest provided
@@ -198,6 +200,8 @@ EOM
     elif [[ $REPORT_NAME = "commit" ]]; then
        __commitReport $_GITHUB_PROJECT_NAME
     elif [[ $REPORT_NAME = "release" ]]; then
+       __releaseReport $_GITHUB_PROJECT_NAME
+    elif [[ $REPORT_NAME = "tag" ]]; then
        __releaseReport $_GITHUB_PROJECT_NAME
     else    
         _writeLog "❌        Invalid report selected!!!!";
