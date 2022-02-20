@@ -26,20 +26,15 @@
 . $(dirname $0)/_logging.sh
 . $(dirname $0)/_github.sh
 . $(dirname $0)/_table.sh
-. $(dirname $0)/_branchreport.sh
-. $(dirname $0)/_branchprotectionreport.sh
-. $(dirname $0)/_pullreport.sh
-. $(dirname $0)/_metricsreport.sh
-. $(dirname $0)/_commitreport.sh
-. $(dirname $0)/_releasereport.sh
-. $(dirname $0)/_tagreport.sh
+. $(dirname $0)/_table.sh
+. $(dirname $0)/_processcheckout.sh
 
 function usage() {
     set -e
     cat <<EOM
 
-    ##### gitreport #####
-    Script to generate various reports on with a manifest file which list multiple github repo projects
+    ##### gitprocess #####
+    Script to allow various processes to be run on with a manifest file which list multiple github repo projects
     or you can supply a single repo name
 
     One of the following is required:
@@ -47,14 +42,8 @@ function usage() {
     Required arguments:
         -m | --manifest         The manifest to use, defaults to current directory
         -t | --token            The Github token to use
-        -r | --report           Report to generate 
-                                    * branch
-                                    * branchProtection
-                                    * pull
-                                    * metrics
-                                    * commit
-                                    * release
-                                    * tag
+        -r | --request          Request to process 
+                                    * checkout - checkout project(s)
 
     Optional arguments:
         -p | --project          Single github reposiitory to use, overrides any manifest provided
@@ -67,9 +56,9 @@ function usage() {
         jq:                 Local jq installation
 
     Examples:
-      Run a report
+      Process a request a sample project
 
-        ../bin/gitreport.sh -m mymanifest.txt -t xxxxxxxxxxxxxxxx -r branch
+        ../bin/gitprocess.sh -m mymanifest.txt -t xxxxxxxxxxxxxxxx -r checkout
 
     Notes:
 
@@ -79,6 +68,8 @@ EOM
 }
 
     if [ $# == 0 ]; then usage; fi
+
+    SCRIPT_NAME="gitprocess"
 
     _writeLog "⏲️     Starting............"
     _writeLog "⏲️     ========================================="
@@ -120,7 +111,7 @@ EOM
     MANIFEST_NAME="manifest.txt"
     _MANIFEST=$MANIFEST_NAME
     _GITHUB_TOKEN=""
-    _REPORT_NAME="missing"
+    _REQUEST_NAME="missing"
     _GITHUB_PROJECT_NAME="none"
     _KEEPFIILES=0
     _DEBUG=0
@@ -139,8 +130,8 @@ EOM
                 _GITHUB_TOKEN="$2"
                 shift # past argument
                 ;;
-            -r|--report)
-                _REPORT_NAME="$2"
+            -r|--request)
+                _REQUEST_NAME="$2"
                 shift # past argument
                 ;;
             -p|--project)
@@ -169,14 +160,14 @@ EOM
 
     MANIFEST_NAME=$_MANIFEST
     GITHUB_TOKEN=$_GITHUB_TOKEN
-    REPORT_NAME=$_REPORT_NAME
+    REQUEST_NAME=$_REQUEST_NAME
     GITHUB_PROJECT_NAME=$_GITHUB_PROJECT_NAME
     KEEPFIILES=$_KEEPFIILES
     DEBUG=$_DEBUG
 
-    if [[ $REPORT_NAME = "missing" ]]
+    if [[ $REQUEST_NAME = "missing" ]]
     then
-        _writeLog "❌        No report provided";
+        _writeLog "❌        No request provided";
         exit 2
     fi
 
@@ -184,27 +175,22 @@ EOM
     if test -f "$MANIFEST_NAME"; then
         _writeLog "✔️       $MANIFEST_NAME exists"
     else    
-        _writeLog "❌        check failure - [$_MANIFEST] does not exist!!!!"; exit 1
+        _writeLog "❌      check failure - [$_MANIFEST] does not exist!!!!"; exit 1
     fi
 
     _writeLog "✔️       Running on $(__getOSType)"
 
-    if [[ $REPORT_NAME = "branch" ]]; then
-        __branchReport $_GITHUB_PROJECT_NAME
-    elif [[ $REPORT_NAME = "branchProtection" ]]; then
-       __branchProtectionReport $_GITHUB_PROJECT_NAME
-    elif [[ $REPORT_NAME = "pull" ]]; then
-       __pullReport $_GITHUB_PROJECT_NAME
-    elif [[ $REPORT_NAME = "metrics" ]]; then
-       __metricsReport $_GITHUB_PROJECT_NAME
-    elif [[ $REPORT_NAME = "commit" ]]; then
-       __commitReport $_GITHUB_PROJECT_NAME
-    elif [[ $REPORT_NAME = "release" ]]; then
-       __releaseReport $_GITHUB_PROJECT_NAME
-    elif [[ $REPORT_NAME = "tag" ]]; then
-       __tagReport $_GITHUB_PROJECT_NAME
+    # Loop over manifest
+    while IFS="" read -r _repo || [ -n "$_repo" ]
+    do
+            _writeLog "⏲️      Processing Manifest $_repo"
+    done < $MANIFEST_NAME
+
+    if [[ $REQUEST_NAME = "checkout" ]]; then
+        __checkOut 
+
     else    
-        _writeLog "❌        Invalid report selected!!!!";
+        _writeLog "❌        Invalid request selected!!!!";
     fi
 
     if [[ $KEEPFIILES -ne 1 ]]; then

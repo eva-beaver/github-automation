@@ -22,6 +22,7 @@ DEBUG=0
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 SCRIPT_DIR_PARENT="$(dirname "$SCRIPT_DIR")"
+SCRIPT_NAME=${0##*/}
 
 GITHUB_USER="UNKNOWN"
 GITHUB_TOKEN="??????????"

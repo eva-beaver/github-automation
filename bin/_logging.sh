@@ -39,13 +39,15 @@ error_raw() {
 function _writeLog {
 
     echo $1
-    echo $1 >> ./$LOGDIR/gitreport-log-$UNIQID.txt
+    echo $1 >> $SCRIPT_DIR_PARENT/$LOGDIR/$SCRIPT_NAME-log-$UNIQID.txt
 
 }
 
 #////////////////////////////////
 function _writeErrorLog {
 
-    echo $1 >> ./$LOGDIR/gitreport-errors-$UNIQID.txt
+    echo $1
+    echo $1 >> $SCRIPT_DIR_PARENT/$LOGDIR/$SCRIPT_NAME-log-$UNIQID.txt
+    echo $1 >> $SCRIPT_DIR_PARENT/$LOGDIR/$SCRIPT_NAME-errors-$UNIQID.txt
 
 }
